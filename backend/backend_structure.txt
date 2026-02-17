@@ -1,0 +1,97 @@
+📘 API Documentation
+
+Base URL:
+
+http://localhost:5000/api/auth
+
+🔐 1. Authentication APIs
+📝 1.1 Signup
+➤ Endpoint
+POST /signup
+
+➤ Description
+
+Register a new patient or doctor.
+
+➤ Headers
+Content-Type: application/json
+
+🧑 Patient Signup Request Body
+{
+  "name": "Rahul",
+  "email": "rahul@gmail.com",
+  "password": "123456",
+  "role": "patient"
+}
+
+👨‍⚕️ Doctor Signup Request Body
+{
+  "name": "Dr John",
+  "email": "drjohn@gmail.com",
+  "password": "123456",
+  "role": "doctor",
+  "phone": "9876543210",
+  "specialization": "Cardiologist",
+  "qualification": "MBBS, MD",
+  "licenseNumber": "LIC12345",
+  "experience": "10 years"
+}
+
+✅ Success Response
+{
+  "message": "Registered successfully"
+}
+
+🔑 1.2 Login
+➤ Endpoint
+POST /login
+
+➤ Description
+
+Login as patient or doctor.
+
+➤ Headers
+Content-Type: application/json
+
+➤ Request Body
+{
+  "email": "drjohn@gmail.com",
+  "password": "123456",
+  "role": "doctor"
+}
+
+✅ Success Response
+{
+  "message": "Login successful",
+  "token": "JWT_TOKEN_HERE",
+  "user": {
+    "id": "65f9a12345",
+    "name": "Dr John",
+    "email": "drjohn@gmail.com",
+    "role": "doctor"
+  }
+}
+
+🔒 2. Protected API
+👤 2.1 Get Logged-in User Profile
+➤ Endpoint
+GET /me
+
+➤ Description
+
+Returns details of logged-in user.
+
+➤ Headers (Required)
+Authorization: Bearer JWT_TOKEN_HERE
+
+✅ Response Example (Doctor)
+{
+  "_id": "65f9a12345",
+  "name": "Dr John",
+  "email": "drjohn@gmail.com",
+  "phone": "9876543210",
+  "specialization": "Cardiologist",
+  "qualification": "MBBS, MD",
+  "licenseNumber": "LIC12345",
+  "experience": "10 years"
+}
