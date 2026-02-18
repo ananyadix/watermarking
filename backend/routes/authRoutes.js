@@ -1,10 +1,9 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 const authMiddleware = require("../middleware/authMiddleware");
-
-const Patient = require("../models/Patient");
-const Doctor = require("../models/Doctor");
+const roleMiddleware = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
@@ -12,66 +11,22 @@ const router = express.Router();
 // ================= SIGNUP =================
 router.post("/signup", async (req, res) => {
     try {
-        const {
-            name,
-            email,
-            password,
-            role,
-            phone,
-            specialization,
-            qualification,
-            licenseNumber,
-            experience
-        } = req.body;
+        const { name, email, password, role } = req.body;
 
-        // Check required fields
-        if (!name || !email || !password || !role) {
-            return res.status(400).json({ message: "Please fill all required fields" });
-        }
+        const existingUser = await User.findOne({ email });
+        if (existingUser)
+            return res.status(400).json({ message: "User already exists" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        if (role === "patient") {
+        const user = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            role
+        });
 
-            const existingPatient = await Patient.findOne({ email });
-            if (existingPatient) {
-                return res.status(400).json({ message: "Patient already exists" });
-            }
-
-            await Patient.create({
-                name,
-                email,
-                password: hashedPassword
-            });
-
-        } else if (role === "doctor") {
-
-            const existingDoctor = await Doctor.findOne({ email });
-            if (existingDoctor) {
-                return res.status(400).json({ message: "Doctor already exists" });
-            }
-
-            // Optional: Check doctor extra fields
-            if (!phone || !specialization || !qualification || !licenseNumber || !experience) {
-                return res.status(400).json({ message: "Please fill all doctor details" });
-            }
-
-            await Doctor.create({
-                name,
-                email,
-                password: hashedPassword,
-                phone,
-                specialization,
-                qualification,
-                licenseNumber,
-                experience
-            });
-
-        } else {
-            return res.status(400).json({ message: "Invalid role" });
-        }
-
-        res.status(201).json({ message: "Registered successfully" });
+        res.status(201).json({ message: "User registered successfully" });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -82,46 +37,27 @@ router.post("/signup", async (req, res) => {
 // ================= LOGIN =================
 router.post("/login", async (req, res) => {
     try {
-        const { email, password, role } = req.body;
+        const { email, password } = req.body;
 
-        if (!email || !password || !role) {
-            return res.status(400).json({ message: "Please provide email, password and role" });
-        }
-
-        let user;
-
-        if (role === "patient") {
-            user = await Patient.findOne({ email });
-        } else if (role === "doctor") {
-            user = await Doctor.findOne({ email });
-        } else {
-            return res.status(400).json({ message: "Invalid role" });
-        }
-
-        if (!user) {
-            return res.status(400).json({ message: "User not found" });
-        }
+        const user = await User.findOne({ email });
+        if (!user)
+            return res.status(400).json({ message: "Invalid credentials" });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
+        if (!isMatch)
             return res.status(400).json({ message: "Invalid credentials" });
-        }
 
         const token = jwt.sign(
-            { id: user._id, role },
+            { id: user._id, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: "1d" }
         );
 
-        res.status(200).json({
-            message: "Login successful",
+        res.json({
             token,
-            user: {
-                id: user._id,
-                name: user.name,
-                email: user.email,
-                role
-            }
+            role: user.role,
+            name: user.name,
+            email: user.email
         });
 
     } catch (error) {
@@ -129,23 +65,38 @@ router.post("/login", async (req, res) => {
     }
 });
 
-// ================= ACCESSING DETAILS =================
 
-router.get("/me", authMiddleware, async (req, res) => {
-    try {
-        let user;
-
-        if (req.user.role === "patient") {
-            user = await Patient.findById(req.user.id).select("-password");
-        } else if (req.user.role === "doctor") {
-            user = await Doctor.findById(req.user.id).select("-password");
-        }
-
-        res.json(user);
-
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+// ================= PATIENT DASHBOARD =================
+router.get(
+    "/patient",
+    authMiddleware,
+    roleMiddleware("patient"),
+    async(req, res) => {
+        const user = await User.findById(req.user.id).select("-password");
+        res.json({
+            message: "Welcome Patient Dashboard",
+            role: user.role,
+            name: user.name,
+            email: user.email
+        });
     }
-});
+);
+
+
+// ================= DOCTOR DASHBOARD =================
+router.get(
+    "/doctor",
+    authMiddleware,
+    roleMiddleware("doctor"),
+    async(req, res) => {
+        const user = await User.findById(req.user.id).select("-password");
+        res.json({
+            message: "Welcome Doctor Dashboard",
+            role: user.role,
+            name: user.name,
+            email: user.email
+        });
+    }
+);
 
 module.exports = router;

@@ -29,12 +29,7 @@ Content-Type: application/json
   "name": "Dr John",
   "email": "drjohn@gmail.com",
   "password": "123456",
-  "role": "doctor",
-  "phone": "9876543210",
-  "specialization": "Cardiologist",
-  "qualification": "MBBS, MD",
-  "licenseNumber": "LIC12345",
-  "experience": "10 years"
+  "role": "doctor"
 }
 
 ✅ Success Response
@@ -56,14 +51,13 @@ Content-Type: application/json
 ➤ Request Body
 {
   "email": "drjohn@gmail.com",
-  "password": "123456",
-  "role": "doctor"
+  "password": "123456"
 }
 
 ✅ Success Response
 {
   "message": "Login successful",
-  "token": "JWT_TOKEN_HERE",
+  "token": "TOKEN_HERE",
   "user": {
     "id": "65f9a12345",
     "name": "Dr John",
@@ -74,24 +68,39 @@ Content-Type: application/json
 
 🔒 2. Protected API
 👤 2.1 Get Logged-in User Profile
+📝 2.1.1 For Patient
 ➤ Endpoint
-GET /me
+GET /patient
 
 ➤ Description
 
-Returns details of logged-in user.
+Returns details of logged-in patient.
 
 ➤ Headers (Required)
-Authorization: Bearer JWT_TOKEN_HERE
+Authorization: Bearer TOKEN_HERE
 
-✅ Response Example (Doctor)
+✅ Response Example 
 {
-  "_id": "65f9a12345",
-  "name": "Dr John",
-  "email": "drjohn@gmail.com",
-  "phone": "9876543210",
-  "specialization": "Cardiologist",
-  "qualification": "MBBS, MD",
-  "licenseNumber": "LIC12345",
-  "experience": "10 years"
+    "message": "Welcome Patient Dashboard",
+    "role": "patient",
+    "name": "Rahul",
+    "email": "rahul@gmail.com"
+}
+📝 2.1.2 For Doctor
+➤ Endpoint
+GET /doctor
+
+➤ Description
+
+Returns details of logged-in doctor.
+
+➤ Headers (Required)
+Authorization: Bearer TOKEN_HERE
+
+✅ Response Example 
+{
+    "message": "Welcome Doctor Dashboard",
+    "role": "doctor",
+    "name": "Dr John",
+    "email": "drjohn@gmail.com"
 }

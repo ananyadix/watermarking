@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const patientSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
@@ -13,7 +13,12 @@ const patientSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    role: {
+        type: String,
+        enum: ["patient", "doctor"],
+        required: true
     }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Patient", patientSchema);
+module.exports = mongoose.model("User", userSchema);
