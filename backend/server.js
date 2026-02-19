@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 
 dotenv.config();
+const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(express.json());
@@ -15,4 +16,4 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use("/api/auth", require("./routes/authRoutes"));
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+app.listen(PORT, () => console.log("Server running on port 5000"));
