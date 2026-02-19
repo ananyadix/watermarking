@@ -58,12 +58,7 @@ Content-Type: application/json
 {
   "message": "Login successful",
   "token": "TOKEN_HERE",
-  "user": {
-    "id": "65f9a12345",
-    "name": "Dr John",
-    "email": "drjohn@gmail.com",
-    "role": "doctor"
-  }
+  "role": "doctor"
 }
 
 🔒 2. Protected API
